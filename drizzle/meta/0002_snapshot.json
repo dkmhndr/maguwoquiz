@@ -1,0 +1,998 @@
+{
+  "id": "b42324ae-227c-4308-9b25-e3f57bd37a84",
+  "prevId": "7962ac88-960a-47a2-84aa-c95bb824588e",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.bq_gift_allocations": {
+      "name": "bq_gift_allocations",
+      "schema": "",
+      "columns": {
+        "gift_id": {
+          "name": "gift_id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "game_id": {
+          "name": "game_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "recipient_id": {
+          "name": "recipient_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "round_id": {
+          "name": "round_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "source": {
+          "name": "source",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "allocated_at": {
+          "name": "allocated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "clock_timestamp()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "bq_gift_allocations_gift_id_bq_gifts_id_fk": {
+          "name": "bq_gift_allocations_gift_id_bq_gifts_id_fk",
+          "tableFrom": "bq_gift_allocations",
+          "tableTo": "bq_gifts",
+          "columnsFrom": [
+            "gift_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "bq_gift_allocations_game_id_bq_games_id_fk": {
+          "name": "bq_gift_allocations_game_id_bq_games_id_fk",
+          "tableFrom": "bq_gift_allocations",
+          "tableTo": "bq_games",
+          "columnsFrom": [
+            "game_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "bq_gift_allocations_recipient_id_bq_participants_id_fk": {
+          "name": "bq_gift_allocations_recipient_id_bq_participants_id_fk",
+          "tableFrom": "bq_gift_allocations",
+          "tableTo": "bq_participants",
+          "columnsFrom": [
+            "recipient_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "bq_gift_allocations_round_id_bq_rounds_id_fk": {
+          "name": "bq_gift_allocations_round_id_bq_rounds_id_fk",
+          "tableFrom": "bq_gift_allocations",
+          "tableTo": "bq_rounds",
+          "columnsFrom": [
+            "round_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "bq_one_gift_per_recipient": {
+          "name": "bq_one_gift_per_recipient",
+          "nullsNotDistinct": false,
+          "columns": [
+            "game_id",
+            "recipient_id"
+          ]
+        },
+        "bq_one_award_per_round": {
+          "name": "bq_one_award_per_round",
+          "nullsNotDistinct": false,
+          "columns": [
+            "round_id"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "bq_allocation_source": {
+          "name": "bq_allocation_source",
+          "value": "(\"bq_gift_allocations\".\"source\" = 'round' and \"bq_gift_allocations\".\"round_id\" is not null) or (\"bq_gift_allocations\".\"source\" = 'gacha' and \"bq_gift_allocations\".\"round_id\" is null)"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.bq_games": {
+      "name": "bq_games",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'lobby'"
+        },
+        "question_order": {
+          "name": "question_order",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "current_round": {
+          "name": "current_round",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "auto_mode": {
+          "name": "auto_mode",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "version": {
+          "name": "version",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "bq_single_event": {
+          "name": "bq_single_event",
+          "value": "\"bq_games\".\"id\" = 'main'"
+        },
+        "bq_game_status": {
+          "name": "bq_game_status",
+          "value": "\"bq_games\".\"status\" in ('lobby', 'question_active', 'round_closed', 'result_revealed', 'final_gacha', 'game_complete')"
+        },
+        "bq_round_number": {
+          "name": "bq_round_number",
+          "value": "\"bq_games\".\"current_round\" between 0 and 21"
+        },
+        "bq_question_order_length": {
+          "name": "bq_question_order_length",
+          "value": "\"bq_games\".\"question_order\" is null or jsonb_array_length(\"bq_games\".\"question_order\") = 21"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.bq_gifts": {
+      "name": "bq_gifts",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "owner_id": {
+          "name": "owner_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "bq_gifts_owner_id_bq_participants_id_fk": {
+          "name": "bq_gifts_owner_id_bq_participants_id_fk",
+          "tableFrom": "bq_gifts",
+          "tableTo": "bq_participants",
+          "columnsFrom": [
+            "owner_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "bq_gifts_owner_id_unique": {
+          "name": "bq_gifts_owner_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "owner_id"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.bq_invitation_tokens": {
+      "name": "bq_invitation_tokens",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "participant_id": {
+          "name": "participant_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "token_hash": {
+          "name": "token_hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "revoked_at": {
+          "name": "revoked_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "bq_one_live_invitation": {
+          "name": "bq_one_live_invitation",
+          "columns": [
+            {
+              "expression": "participant_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "where": "\"bq_invitation_tokens\".\"revoked_at\" is null",
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "bq_invitation_tokens_participant_id_bq_participants_id_fk": {
+          "name": "bq_invitation_tokens_participant_id_bq_participants_id_fk",
+          "tableFrom": "bq_invitation_tokens",
+          "tableTo": "bq_participants",
+          "columnsFrom": [
+            "participant_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "bq_invitation_tokens_token_hash_unique": {
+          "name": "bq_invitation_tokens_token_hash_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "token_hash"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.bq_answer_options": {
+      "name": "bq_answer_options",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "question_id": {
+          "name": "question_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "position": {
+          "name": "position",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "label": {
+          "name": "label",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "is_correct": {
+          "name": "is_correct",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "bq_one_correct_option": {
+          "name": "bq_one_correct_option",
+          "columns": [
+            {
+              "expression": "question_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "where": "\"bq_answer_options\".\"is_correct\"",
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "bq_answer_options_question_id_bq_questions_id_fk": {
+          "name": "bq_answer_options_question_id_bq_questions_id_fk",
+          "tableFrom": "bq_answer_options",
+          "tableTo": "bq_questions",
+          "columnsFrom": [
+            "question_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "bq_option_question_pair": {
+          "name": "bq_option_question_pair",
+          "nullsNotDistinct": false,
+          "columns": [
+            "id",
+            "question_id"
+          ]
+        },
+        "bq_option_position": {
+          "name": "bq_option_position",
+          "nullsNotDistinct": false,
+          "columns": [
+            "question_id",
+            "position"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "bq_option_position_range": {
+          "name": "bq_option_position_range",
+          "value": "\"bq_answer_options\".\"position\" between 0 and 3"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.bq_participants": {
+      "name": "bq_participants",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.bq_questions": {
+      "name": "bq_questions",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "author_id": {
+          "name": "author_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "text": {
+          "name": "text",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "bq_questions_author_id_bq_participants_id_fk": {
+          "name": "bq_questions_author_id_bq_participants_id_fk",
+          "tableFrom": "bq_questions",
+          "tableTo": "bq_participants",
+          "columnsFrom": [
+            "author_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "bq_questions_author_id_unique": {
+          "name": "bq_questions_author_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "author_id"
+          ]
+        },
+        "bq_question_author_pair": {
+          "name": "bq_question_author_pair",
+          "nullsNotDistinct": false,
+          "columns": [
+            "id",
+            "author_id"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.bq_rate_limits": {
+      "name": "bq_rate_limits",
+      "schema": "",
+      "columns": {
+        "key": {
+          "name": "key",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "window_start": {
+          "name": "window_start",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "clock_timestamp()"
+        },
+        "count": {
+          "name": "count",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 1
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.bq_rounds": {
+      "name": "bq_rounds",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "game_id": {
+          "name": "game_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "question_id": {
+          "name": "question_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "number": {
+          "name": "number",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "started_at": {
+          "name": "started_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "deadline": {
+          "name": "deadline",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "closed_at": {
+          "name": "closed_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "revealed_at": {
+          "name": "revealed_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "winner_id": {
+          "name": "winner_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "bq_one_active_round": {
+          "name": "bq_one_active_round",
+          "columns": [
+            {
+              "expression": "game_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "where": "\"bq_rounds\".\"closed_at\" is null",
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "bq_rounds_game_id_bq_games_id_fk": {
+          "name": "bq_rounds_game_id_bq_games_id_fk",
+          "tableFrom": "bq_rounds",
+          "tableTo": "bq_games",
+          "columnsFrom": [
+            "game_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "bq_rounds_question_id_bq_questions_id_fk": {
+          "name": "bq_rounds_question_id_bq_questions_id_fk",
+          "tableFrom": "bq_rounds",
+          "tableTo": "bq_questions",
+          "columnsFrom": [
+            "question_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "bq_rounds_winner_id_bq_participants_id_fk": {
+          "name": "bq_rounds_winner_id_bq_participants_id_fk",
+          "tableFrom": "bq_rounds",
+          "tableTo": "bq_participants",
+          "columnsFrom": [
+            "winner_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "bq_round_number_unique": {
+          "name": "bq_round_number_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "game_id",
+            "number"
+          ]
+        },
+        "bq_question_once": {
+          "name": "bq_question_once",
+          "nullsNotDistinct": false,
+          "columns": [
+            "game_id",
+            "question_id"
+          ]
+        },
+        "bq_round_question_game": {
+          "name": "bq_round_question_game",
+          "nullsNotDistinct": false,
+          "columns": [
+            "id",
+            "question_id",
+            "game_id"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "bq_valid_round_number": {
+          "name": "bq_valid_round_number",
+          "value": "\"bq_rounds\".\"number\" between 1 and 21"
+        },
+        "bq_valid_deadline": {
+          "name": "bq_valid_deadline",
+          "value": "\"bq_rounds\".\"deadline\" > \"bq_rounds\".\"started_at\""
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.bq_sessions": {
+      "name": "bq_sessions",
+      "schema": "",
+      "columns": {
+        "token_hash": {
+          "name": "token_hash",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "role": {
+          "name": "role",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "participant_id": {
+          "name": "participant_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "invitation_id": {
+          "name": "invitation_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "host_version": {
+          "name": "host_version",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "expires_at": {
+          "name": "expires_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "last_seen_at": {
+          "name": "last_seen_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "bq_sessions_expiry": {
+          "name": "bq_sessions_expiry",
+          "columns": [
+            {
+              "expression": "expires_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "bq_sessions_participant": {
+          "name": "bq_sessions_participant",
+          "columns": [
+            {
+              "expression": "participant_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "bq_sessions_participant_id_bq_participants_id_fk": {
+          "name": "bq_sessions_participant_id_bq_participants_id_fk",
+          "tableFrom": "bq_sessions",
+          "tableTo": "bq_participants",
+          "columnsFrom": [
+            "participant_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "bq_sessions_invitation_id_bq_invitation_tokens_id_fk": {
+          "name": "bq_sessions_invitation_id_bq_invitation_tokens_id_fk",
+          "tableFrom": "bq_sessions",
+          "tableTo": "bq_invitation_tokens",
+          "columnsFrom": [
+            "invitation_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "bq_session_identity": {
+          "name": "bq_session_identity",
+          "value": "(\"bq_sessions\".\"role\" = 'participant' and \"bq_sessions\".\"participant_id\" is not null and \"bq_sessions\".\"invitation_id\" is not null and \"bq_sessions\".\"host_version\" is null) or (\"bq_sessions\".\"role\" = 'host' and \"bq_sessions\".\"participant_id\" is null and \"bq_sessions\".\"invitation_id\" is null and \"bq_sessions\".\"host_version\" is not null)"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.bq_submissions": {
+      "name": "bq_submissions",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "bigint",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "type": "always",
+            "name": "bq_submissions_id_seq",
+            "schema": "public",
+            "increment": "1",
+            "startWith": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "cache": "1",
+            "cycle": false
+          }
+        },
+        "round_id": {
+          "name": "round_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "question_id": {
+          "name": "question_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "game_id": {
+          "name": "game_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "participant_id": {
+          "name": "participant_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "option_id": {
+          "name": "option_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "received_at": {
+          "name": "received_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "clock_timestamp()"
+        }
+      },
+      "indexes": {
+        "bq_submission_order": {
+          "name": "bq_submission_order",
+          "columns": [
+            {
+              "expression": "round_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "received_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "bq_submissions_participant_id_bq_participants_id_fk": {
+          "name": "bq_submissions_participant_id_bq_participants_id_fk",
+          "tableFrom": "bq_submissions",
+          "tableTo": "bq_participants",
+          "columnsFrom": [
+            "participant_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "bq_submission_round": {
+          "name": "bq_submission_round",
+          "tableFrom": "bq_submissions",
+          "tableTo": "bq_rounds",
+          "columnsFrom": [
+            "round_id",
+            "question_id",
+            "game_id"
+          ],
+          "columnsTo": [
+            "id",
+            "question_id",
+            "game_id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "bq_submission_option": {
+          "name": "bq_submission_option",
+          "tableFrom": "bq_submissions",
+          "tableTo": "bq_answer_options",
+          "columnsFrom": [
+            "option_id",
+            "question_id"
+          ],
+          "columnsTo": [
+            "id",
+            "question_id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "bq_one_submission": {
+          "name": "bq_one_submission",
+          "nullsNotDistinct": false,
+          "columns": [
+            "round_id",
+            "participant_id"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {},
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}

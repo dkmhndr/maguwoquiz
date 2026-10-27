@@ -1,0 +1,8 @@
+node_modules
+.next
+package-lock.json
+drizzle
+test-results
+playwright-report
+private-invitations*.json
+.local-data

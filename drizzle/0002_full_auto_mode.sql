@@ -1,0 +1,1 @@
+ALTER TABLE "bq_games" ADD COLUMN "auto_mode" boolean DEFAULT false NOT NULL;
