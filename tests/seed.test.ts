@@ -15,7 +15,7 @@ describe("event seed", () => {
       "Rio",
       "Vania",
       "Hafizal",
-      "Margina",
+      "Gina Ho",
       "Jihad",
       "Farras",
       "Nadia",

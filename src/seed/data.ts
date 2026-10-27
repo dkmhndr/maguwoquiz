@@ -56,7 +56,7 @@ const questions = [
     1,
   ],
   [
-    "Margina",
+    "Gina Ho",
     "Kalau kamu kenal aku, kamu pasti tahu kalau aku…",
     [
       "Gak suka ngemil",
