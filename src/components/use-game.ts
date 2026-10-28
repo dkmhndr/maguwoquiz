@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { GameState } from "@/shared/types";
 
+const REQUEST_TIMEOUT_MS = 30_000;
+
 export class ApiError extends Error {
   constructor(
     message: string,
@@ -18,7 +20,7 @@ export async function api<T>(path: string, body?: unknown): Promise<T> {
     method: body === undefined ? "GET" : "POST",
     credentials: "same-origin",
     cache: "no-store",
-    signal: AbortSignal.timeout(8000),
+    signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
     ...(body === undefined
       ? {}
       : { headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) }),
