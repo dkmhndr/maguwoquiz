@@ -10,14 +10,14 @@ afterAll(async () => {
   await app?.close();
 });
 
-it("ranks all 20 players by correct answers after completion, independent of gifts and response time", async () => {
+it("ranks all 19 players by correct answers after completion, independent of gifts and response time", async () => {
   const host = await app.host();
   const players = await Promise.all(seedData.map((_, index) => app.player(index)));
   const scores = new Map(seedData.map((person) => [person.id, 0]));
   let previousWinnerAnswered = false;
   expect((await players[0].get()).body.ranking).toBeNull();
   await host.action("initialize");
-  for (let number = 1; number <= 20; number++) {
+  for (let number = 1; number <= 19; number++) {
     expect((await host.action("start")).status).toBe(200);
     const state = (await host.get()).body;
     const author = seedData.find((person) => person.id === state.round.authorId)!;
@@ -60,7 +60,7 @@ it("ranks all 20 players by correct answers after completion, independent of gif
   expect((await host.action("gacha")).status).toBe(200);
   await app.tieTimes();
   const ranking = (await host.get()).body.ranking;
-  expect(ranking).toHaveLength(20);
+  expect(ranking).toHaveLength(19);
   const sorted = [...scores.values()].sort((a, b) => b - a);
   expect(new Set(sorted).size).toBeGreaterThan(1);
   expect(sorted.filter((count) => count === 0).length).toBeGreaterThan(1);
@@ -72,7 +72,7 @@ it("ranks all 20 players by correct answers after completion, independent of gif
     expect(entry.correctCount).toBe(sorted[index]);
     expect(entry.rank).toBe(sorted.indexOf(entry.correctCount) + 1);
   }
-  for (const player of [players[0], players[1], players[19]]) {
+  for (const player of [players[0], players[1], players[18]]) {
     const state = (await player.get()).body;
     expect(state.ranking).toEqual(ranking);
     expect(state.myQuizResult).toBeUndefined();

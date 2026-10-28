@@ -8,9 +8,9 @@ validateSeed(seedData);
 const connection = await openDatabase();
 try {
   for (const [label, table, expected] of [
-    ["participants", participants, 20],
-    ["questions", questions, 20],
-    ["gifts", gifts, 20],
+    ["participants", participants, 19],
+    ["questions", questions, 19],
+    ["gifts", gifts, 19],
   ] as const) {
     const [{ count }] = await connection.db
       .select({ count: sql<number>`count(*)::int` })
@@ -26,11 +26,11 @@ try {
     })
     .from(options)
     .groupBy(options.questionId);
-  if (optionCounts.length !== 20 || optionCounts.some((q) => q.count !== 4 || q.correct !== 1))
+  if (optionCounts.length !== 19 || optionCounts.some((q) => q.count !== 4 || q.correct !== 1))
     throw new Error(
-      "Each of the 20 questions must have four options and exactly one correct option.",
+      "Each of the 19 questions must have four options and exactly one correct option.",
     );
-  console.log("answer options: 80; correct options: 20");
+  console.log("answer options: 76; correct options: 19");
   console.log(
     "Game:",
     await connection.db

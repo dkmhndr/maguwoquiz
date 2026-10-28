@@ -46,7 +46,7 @@ describe("full auto: 15-second questions and 10-second intermissions", () => {
     ).toBe(403);
   });
 
-  it("keeps answers hidden for the full 15 seconds even after all 19 friends submit", async () => {
+  it("keeps answers hidden for the full 15 seconds even after all 18 friends submit", async () => {
     const host = await startAuto();
     const before = (await host.get()).body;
     const author = seedData.find((p) => p.id === before.round.authorId)!;
@@ -57,7 +57,7 @@ describe("full auto: 15-second questions and 10-second intermissions", () => {
     };
     expect((await authorPlayer.post("answer", input)).body.error.code).toBe("AUTHOR_EXCLUDED");
     let firstPlayer: Awaited<ReturnType<typeof app.player>> | undefined;
-    for (let index = 0; index < 20; index++) {
+    for (let index = 0; index < 19; index++) {
       if (seedData[index].id === author.id) continue;
       const player = await app.player(index);
       firstPlayer ??= player;
@@ -65,7 +65,7 @@ describe("full auto: 15-second questions and 10-second intermissions", () => {
     }
     const active = (await firstPlayer!.get()).body;
     expect(active.status).toBe("question_active");
-    expect(active.round.submissionCount).toBe(19);
+    expect(active.round.submissionCount).toBe(18);
     expect(active.round.correctOptionId).toBeUndefined();
     expect(active.submission.correct).toBeUndefined();
     expect(active.ledger).toHaveLength(0);
@@ -134,11 +134,11 @@ describe("full auto: 15-second questions and 10-second intermissions", () => {
     expect(Date.parse(next.round.deadline) - Date.parse(next.serverNow)).toBeGreaterThan(14000);
   });
 
-  it("runs all 20 rounds and final gacha automatically, with private gifts and ranking", async () => {
+  it("runs all 19 rounds and final gacha automatically, with private gifts and ranking", async () => {
     await startAuto();
     const player = await app.player(0);
     const seen = new Set<string>();
-    for (let number = 1; number <= 20; number++) {
+    for (let number = 1; number <= 19; number++) {
       const active = (await player.get()).body;
       expect(active.status).toBe("question_active");
       expect(active.roundNumber).toBe(number);
@@ -155,9 +155,9 @@ describe("full auto: 15-second questions and 10-second intermissions", () => {
     const replies = await Promise.all([player.get(), player.get(), player.get()]);
     for (const { body } of replies) {
       expect(body.status).toBe("game_complete");
-      expect(body.roundNumber).toBe(20);
+      expect(body.roundNumber).toBe(19);
       expect(body.intermissionEndsAt).toBeNull();
-      expect(body.ranking).toHaveLength(20);
+      expect(body.ranking).toHaveLength(19);
       expect(
         body.ranking.every(
           (entry: { rank: number; correctCount: number }) =>
@@ -165,14 +165,14 @@ describe("full auto: 15-second questions and 10-second intermissions", () => {
         ),
       ).toBe(true);
       expect(body.myGift.source).toBe("gacha");
-      expect(body.ledger).toHaveLength(20);
-      expect(new Set(body.ledger.map((a: { recipientId: string }) => a.recipientId)).size).toBe(20);
-      expect(new Set(body.ledger.map((a: { giftId: string }) => a.giftId)).size).toBe(20);
+      expect(body.ledger).toHaveLength(19);
+      expect(new Set(body.ledger.map((a: { recipientId: string }) => a.recipientId)).size).toBe(19);
+      expect(new Set(body.ledger.map((a: { giftId: string }) => a.giftId)).size).toBe(19);
       expect(body.ledger).toEqual(replies[0].body.ledger);
       expect(JSON.stringify(body)).not.toMatch(/giftName|description/);
     }
-    expect(await app.db.select().from(rounds)).toHaveLength(20);
-    expect(await app.db.select().from(allocations)).toHaveLength(20);
+    expect(await app.db.select().from(rounds)).toHaveLength(19);
+    expect(await app.db.select().from(allocations)).toHaveLength(19);
     const host = await app.host();
     expect((await host.get()).body.ranking).toEqual(replies[0].body.ranking);
     expect((await host.action("gacha")).status).toBe(200);
@@ -182,10 +182,10 @@ describe("full auto: 15-second questions and 10-second intermissions", () => {
   it("rolls back automatic final gacha on integrity errors without losing the last result", async () => {
     await startAuto();
     const player = await app.player(0);
-    for (let number = 1; number <= 20; number++) {
+    for (let number = 1; number <= 19; number++) {
       await app.expireRound();
       expect((await player.get()).body.status).toBe("result_revealed");
-      if (number < 20) {
+      if (number < 19) {
         await app.expireIntermission();
         expect((await player.get()).body.status).toBe("question_active");
       }

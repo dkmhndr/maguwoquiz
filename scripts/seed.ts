@@ -6,7 +6,7 @@ const connection = await openDatabase();
 try {
   await seedDatabase(connection.db);
   console.log(
-    "Validated 20 participants/questions/gifts. Existing matching seed and results preserved.",
+    "Validated 19 participants/questions/gifts. Existing matching seed and results preserved.",
   );
 } finally {
   await connection.close();

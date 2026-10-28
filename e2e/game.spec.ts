@@ -138,7 +138,7 @@ test("results open without the host while a phone reconnects and keeps gift cont
         };
         let correctOnlyChecked = false;
         let automaticDismissChecked = false;
-        for (let number = 2; number <= 20; number++) {
+        for (let number = 2; number <= 19; number++) {
           const current = await (await resumedHost.request.get("/api/host/state")).json();
           const checkCorrectOnly =
             (!correctOnlyChecked || !automaticDismissChecked) &&
@@ -199,7 +199,7 @@ test("results open without the host while a phone reconnects and keeps gift cont
             correctOnlyChecked = true;
           }
           await hostAction("advance");
-          if (number < 20) await hostAction("start");
+          if (number < 19) await hostAction("start");
           if (checkAutomaticDismiss) {
             await expect(player.getByRole("dialog")).not.toBeVisible({ timeout: 15000 });
             automaticDismissChecked = true;

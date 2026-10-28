@@ -24,7 +24,7 @@ try {
   await file.sync();
   persisted = true;
   console.log(
-    `20 private invitations saved to ${output}. Keep this file private; links are bearer credentials.`,
+    `19 private invitations saved to ${output}. Keep this file private; links are bearer credentials.`,
   );
 } finally {
   await file.close();

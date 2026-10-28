@@ -40,7 +40,7 @@ async function activeRound(db: Database, game: Game) {
 
 async function startRound(db: Database, game: Game): Promise<Game> {
   requireCondition(
-    game.questionOrder && game.currentRound < 20,
+    game.questionOrder && game.currentRound < 19,
     "INVALID_TRANSITION",
     "Ronde tidak dapat dimulai saat ini.",
   );
@@ -70,8 +70,8 @@ async function distributeGifts(db: Database, game: Game): Promise<Game> {
   const remainingPeople = people.filter((p) => !assigned.some((a) => a.recipientId === p.id));
   const remainingGifts = allGifts.filter((g) => !assigned.some((a) => a.giftId === g.id));
   requireCondition(
-    people.length === 20 &&
-      allGifts.length === 20 &&
+    people.length === 19 &&
+      allGifts.length === 19 &&
       remainingPeople.length === remainingGifts.length,
     "GACHA_INTEGRITY",
     "Jumlah hadiah dan penerima tidak cocok. Gacha diblokir; periksa database.",
@@ -88,9 +88,9 @@ async function distributeGifts(db: Database, game: Game): Promise<Game> {
     );
   const ledger = await db.select().from(allocations).where(eq(allocations.gameId, game.id));
   requireCondition(
-    ledger.length === 20 &&
-      new Set(ledger.map((a) => a.giftId)).size === 20 &&
-      new Set(ledger.map((a) => a.recipientId)).size === 20,
+    ledger.length === 19 &&
+      new Set(ledger.map((a) => a.giftId)).size === 19 &&
+      new Set(ledger.map((a) => a.recipientId)).size === 19,
     "GACHA_INTEGRITY",
     "Ledger hadiah tidak valid; transaksi dibatalkan.",
   );
@@ -185,7 +185,7 @@ async function withGame<T>(
       requireCondition(round?.revealedAt, "ROUND_INTEGRITY", "Hasil ronde tidak ditemukan.");
       if (round.revealedAt.getTime() + INTERMISSION_MS <= (await databaseTime(tx)).getTime()) {
         game =
-          game.currentRound === 20 ? await distributeGifts(tx, game) : await startRound(tx, game);
+          game.currentRound === 19 ? await distributeGifts(tx, game) : await startRound(tx, game);
       }
     }
     try {
@@ -443,7 +443,7 @@ export async function submitAnswer(
       .select({ count: sql<number>`count(*)::int` })
       .from(submissions)
       .where(eq(submissions.roundId, round.id));
-    if (count === 19 && !game.autoMode) await closeRound(tx, game);
+    if (count === 18 && !game.autoMode) await closeRound(tx, game);
     return { ok: true as const };
   });
 }
@@ -501,9 +501,9 @@ export async function hostAction(
         .from(questions)
         .orderBy(questions.id);
       requireCondition(
-        allQuestions.length === 20,
+        allQuestions.length === 19,
         "SEED_INTEGRITY",
-        "Game memerlukan tepat 20 pertanyaan.",
+        "Game memerlukan tepat 19 pertanyaan.",
       );
       await tx
         .update(games)
@@ -513,7 +513,7 @@ export async function hostAction(
     }
     if (action === "start") {
       requireCondition(
-        game.status === "lobby" && game.questionOrder && game.currentRound < 20,
+        game.status === "lobby" && game.questionOrder && game.currentRound < 19,
         "INVALID_TRANSITION",
         "Ronde tidak dapat dimulai saat ini.",
       );
@@ -538,7 +538,7 @@ export async function hostAction(
       await tx
         .update(games)
         .set({
-          status: game.currentRound === 20 ? "final_gacha" : "lobby",
+          status: game.currentRound === 19 ? "final_gacha" : "lobby",
           version: game.version + 1,
         })
         .where(eq(games.id, game.id));
@@ -546,7 +546,7 @@ export async function hostAction(
     }
     if (action === "gacha") {
       requireCondition(
-        game.status === "final_gacha" && game.currentRound === 20,
+        game.status === "final_gacha" && game.currentRound === 19,
         "INVALID_TRANSITION",
         "Selesaikan seluruh ronde sebelum gacha.",
       );

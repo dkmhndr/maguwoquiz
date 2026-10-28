@@ -10,13 +10,13 @@ afterAll(async () => {
   await app?.close();
 });
 
-it("plays 20 no-winner rounds and atomically assigns every gift exactly once with idempotent gacha", async () => {
+it("plays 19 no-winner rounds and atomically assigns every gift exactly once with idempotent gacha", async () => {
   const host = await app.host();
-  const players = await Promise.all(Array.from({ length: 20 }, (_, i) => app.player(i)));
+  const players = await Promise.all(Array.from({ length: 19 }, (_, i) => app.player(i)));
   expect((await host.action("gacha")).status).toBe(409);
   await host.action("initialize");
   const authors = new Set<string>();
-  for (let index = 0; index < 20; index++) {
+  for (let index = 0; index < 19; index++) {
     expect((await host.action("start")).status).toBe(200);
     const round = (await host.get()).body.round;
     authors.add(round.authorId);
@@ -24,18 +24,18 @@ it("plays 20 no-winner rounds and atomically assigns every gift exactly once wit
     expect((await host.get()).body.round.winnerId).toBeNull();
     expect((await host.action("advance")).status).toBe(200);
   }
-  expect(authors.size).toBe(20);
+  expect(authors.size).toBe(19);
   expect((await host.get()).body.status).toBe("final_gacha");
   const version = (await host.get()).body.version;
   const replies = await Promise.all([host.action("gacha", version), host.action("gacha", version)]);
   expect(replies.map((reply) => reply.status)).toEqual([200, 200]);
   const complete = (await host.get()).body;
   expect(complete.status).toBe("game_complete");
-  expect(complete.ledger).toHaveLength(20);
+  expect(complete.ledger).toHaveLength(19);
   expect(
     new Set(complete.ledger.map((award: { recipientId: string }) => award.recipientId)).size,
-  ).toBe(20);
-  expect(new Set(complete.ledger.map((award: { giftId: string }) => award.giftId)).size).toBe(20);
+  ).toBe(19);
+  expect(new Set(complete.ledger.map((award: { giftId: string }) => award.giftId)).size).toBe(19);
   expect(JSON.stringify(complete)).not.toMatch(/giftName|description/);
   for (const player of players) {
     const state = (await player.get()).body;

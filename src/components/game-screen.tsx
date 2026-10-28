@@ -65,7 +65,7 @@ function People({ state, host }: { state: GameState; host: boolean }) {
     <section className="people-panel">
       <div className="section-heading">
         <h3>Member</h3>
-        <span>{state.participants.filter((p) => p.online).length}/20 online</span>
+        <span>{state.participants.filter((p) => p.online).length}/19 online</span>
       </div>
       <div className="people-grid">
         {state.participants.map((person, index) => (
@@ -102,7 +102,7 @@ function Ledger({ state }: { state: GameState }) {
     <section className="ledger">
       <div className="section-heading">
         <h3>Tukar Kado</h3>
-        <span>{state.ledger.length}/20 dibagikan</span>
+        <span>{state.ledger.length}/19 dibagikan</span>
       </div>
       {!state.ledger.length ? (
         <p className="muted">Setiap hadiah menunggu pemilik barunya.</p>
@@ -270,7 +270,7 @@ export function GameScreen({ host = false }: { host?: boolean }) {
           : state.status === "result_revealed"
             ? [
                 "advance",
-                state.roundNumber === 20 ? "Lanjut ke final gacha" : "Lanjut ke ronde berikutnya",
+                state.roundNumber === 19 ? "Lanjut ke final gacha" : "Lanjut ke ronde berikutnya",
               ]
             : state.status === "final_gacha"
               ? ["gacha", "Bagikan hadiah tersisa"]
@@ -308,10 +308,10 @@ export function GameScreen({ host = false }: { host?: boolean }) {
             <span>
               {state.status === "game_complete"
                 ? "GAME COMPLETE"
-                : `RONDE ${String(state.roundNumber).padStart(2, "0")} / 20`}
+                : `RONDE ${String(state.roundNumber).padStart(2, "0")} / 19`}
             </span>
             <div className="progress-track">
-              <i style={{ width: `${(state.roundNumber / 20) * 100}%` }} />
+              <i style={{ width: `${(state.roundNumber / 19) * 100}%` }} />
             </div>
             <span>{state.ledger.length} hadiah</span>
           </div>
@@ -341,7 +341,7 @@ export function GameScreen({ host = false }: { host?: boolean }) {
                       : "Kamu sudah masuk. Tunggu host memulai ronde, lalu pilih jawaban secepat mungkin."}
                 </p>
                 <div className="mini-rules">
-                  <span>20 teman</span>
+                  <span>19 teman</span>
                   <span>15 detik</span>
                   {state.autoMode && <span>10 detik jeda</span>}
                   <span>1 hadiah / orang</span>
@@ -375,12 +375,12 @@ export function GameScreen({ host = false }: { host?: boolean }) {
             <section className="intermission-card">
               <div>
                 <h3>
-                  {state.roundNumber === 20
+                  {state.roundNumber === 19
                     ? "Hadiah terakhir sebentar lagi..."
                     : "Siap untuk ronde berikutnya?"}
                 </h3>
                 <p>
-                  {state.roundNumber === 20
+                  {state.roundNumber === 19
                     ? "Final gacha dan ranking terbuka otomatis setelah jeda."
                     : "Lihat hasilmu. Ronde berikutnya dimulai otomatis setelah jeda."}
                 </p>
@@ -388,7 +388,7 @@ export function GameScreen({ host = false }: { host?: boolean }) {
               <div
                 className="timer"
                 role="timer"
-                aria-label={`${seconds} detik menuju ${state.roundNumber === 20 ? "final gacha" : "ronde berikutnya"}`}
+                aria-label={`${seconds} detik menuju ${state.roundNumber === 19 ? "final gacha" : "ronde berikutnya"}`}
               >
                 <strong>{seconds}</strong>
                 <span>DETIK</span>
@@ -473,7 +473,7 @@ export function GameScreen({ host = false }: { host?: boolean }) {
                           ? "Jawaban masih dibuka"
                           : "Jawaban ditutup"}
                 </span>
-                <span>{round.submissionCount}/19 jawaban</span>
+                <span>{round.submissionCount}/18 jawaban</span>
               </div>
               {round.revealed && (
                 <div className={`winner-reveal ${isWinner ? "you-won" : ""}`}>
@@ -507,9 +507,9 @@ export function GameScreen({ host = false }: { host?: boolean }) {
               <GiftIcon />
               <span className="eyebrow">A LITTLE LUCK, A LOT OF LOVE</span>
               <h2>
-                {20 - state.ledger.length} hadiah.
+                {19 - state.ledger.length} hadiah.
                 <br />
-                {20 - state.ledger.length} teman beruntung.
+                {19 - state.ledger.length} teman beruntung.
               </h2>
               <p>
                 {host
@@ -544,7 +544,7 @@ export function GameScreen({ host = false }: { host?: boolean }) {
                   {state.autoMode
                     ? "Host memberi cue pertama. Setelah dimulai, sistem menjalankan 15 detik menjawab dan 10 detik jeda sampai hadiah terakhir dibagikan."
                     : state.status === "question_active"
-                      ? "Hasil otomatis terbuka saat waktu habis atau 19 jawaban masuk. Menutup ronde lebih awal juga langsung membuka hasil."
+                      ? "Hasil otomatis terbuka saat waktu habis atau 18 jawaban masuk. Menutup ronde lebih awal juga langsung membuka hasil."
                       : state.status === "result_revealed"
                         ? "Hasil sudah terbuka otomatis. Soal berikutnya dimulai hanya saat kamu memberi cue."
                         : "Kontrol divalidasi server. Aksi dari status lama tidak akan mengubah ronde baru."}
@@ -603,7 +603,7 @@ export function GameScreen({ host = false }: { host?: boolean }) {
               </div>
             </section>
           )}
-          {(host) && <Ledger state={state} />}
+          {host && <Ledger state={state} />}
           {host && <HostHistory />}
         </div>
         <aside className="game-sidebar">

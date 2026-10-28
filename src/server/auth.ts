@@ -41,9 +41,9 @@ export async function generateInvitations(db: Database, appUrl: string, rotate =
     await tx.select().from(games).where(eq(games.id, "main")).for("update");
     const people = await tx.select().from(participants).orderBy(participants.id);
     requireCondition(
-      people.length === 20,
+      people.length === 19,
       "NOT_SEEDED",
-      "Seed exactly 20 participants before generating invitations.",
+      "Seed exactly 19 participants before generating invitations.",
     );
     const existing = await tx.select().from(invitations).where(isNull(invitations.revokedAt));
     requireCondition(

@@ -16,7 +16,7 @@ describe("private event over HTTP", () => {
     const state = await player.get();
     expect(state.status).toBe(200);
     expect(state.body.me.name).toBe(seedData[0].name);
-    expect(state.body.participants).toHaveLength(20);
+    expect(state.body.participants).toHaveLength(19);
     expect((await player.post("host/action", { action: "initialize", version: 0 })).status).toBe(
       403,
     );

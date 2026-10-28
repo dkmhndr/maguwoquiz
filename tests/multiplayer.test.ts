@@ -10,13 +10,13 @@ afterAll(async () => {
   await app?.close();
 });
 
-it("runs a persisted 20-player game with concurrent answers, excludes previous winners, and completes with one gift each", async () => {
+it("runs a persisted 19-player game with concurrent answers, excludes previous winners, and completes with one gift each", async () => {
   const host = await app.host();
-  const players = await Promise.all(Array.from({ length: 20 }, (_, i) => app.player(i)));
+  const players = await Promise.all(Array.from({ length: 19 }, (_, i) => app.player(i)));
   await host.action("initialize");
   const awarded = new Set<string>();
   const authors = new Set<string>();
-  for (let number = 1; number <= 20; number++) {
+  for (let number = 1; number <= 19; number++) {
     expect((await host.action("start")).status).toBe(200);
     const state = (await host.get()).body;
     authors.add(state.round.authorId);
@@ -39,10 +39,10 @@ it("runs a persisted 20-player game with concurrent answers, excludes previous w
     expect(replies.every((reply) => reply.status === 200)).toBe(true);
     const result = (await host.get()).body;
     expect(result.status).toBe("result_revealed");
-    expect(result.round.submissionCount).toBe(19);
+    expect(result.round.submissionCount).toBe(18);
     expect(result.round.correctOptionId).toBe(correct);
     expect(result.round.winnerId).toBe(expectedWinner?.id ?? null);
-    expect(result.round.logs).toHaveLength(19);
+    expect(result.round.logs).toHaveLength(18);
     if (expectedWinner) awarded.add(expectedWinner.id);
     expect(result.ledger.length).toBe(awarded.size);
     expect(JSON.stringify(result.ledger)).not.toMatch(/giftName|description/);
@@ -58,12 +58,12 @@ it("runs a persisted 20-player game with concurrent answers, excludes previous w
     );
     expect((await host.action("advance")).status).toBe(200);
   }
-  expect(authors.size).toBe(20);
+  expect(authors.size).toBe(19);
   expect((await host.action("gacha")).status).toBe(200);
   const state = (await host.get()).body;
   expect(state.status).toBe("game_complete");
-  expect(state.ledger).toHaveLength(20);
-  expect(new Set(state.ledger.map((g: { recipientId: string }) => g.recipientId)).size).toBe(20);
+  expect(state.ledger).toHaveLength(19);
+  expect(new Set(state.ledger.map((g: { recipientId: string }) => g.recipientId)).size).toBe(19);
   const reconnects = await Promise.all(players.map((player) => player.get()));
   expect(reconnects.every((reply) => reply.body.myGift !== null)).toBe(true);
 }, 60000);

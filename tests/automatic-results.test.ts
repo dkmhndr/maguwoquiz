@@ -80,7 +80,7 @@ describe("private gifts and host-cued rounds", () => {
     expect(result.myGift.ownerName).toBe(author.name);
     expect(result.ledger).toHaveLength(2);
     expect(result.submission.correct).toBe(true);
-    const observer = await app.player(round.authorId === "p20" ? 18 : 19);
+    const observer = await app.player(round.authorId === "p20" ? 17 : 18);
     expect((await observer.post("answer", input)).body.error.code).toBe("ROUND_CLOSED");
     const reconnect = (await app.request("GET", "state", undefined, player.cookie)).body;
     expect(reconnect.status).toBe("result_revealed");

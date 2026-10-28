@@ -121,12 +121,6 @@ const questions = [
     0,
   ],
   [
-    "Syauqy",
-    "Kalau kamu kenal aku, kamu pasti tahu kalau bulan ini aku menyelesaikan…",
-    ["Half marathon", "Lari 10K", "Full marathon", "Ultra marathon"],
-    2,
-  ],
-  [
     "Khasin",
     "Kalau kamu kenal aku, kamu pasti tahu kalau banyak yang bilang aku mirip…",
     ["Ariel Noah", "Rian D’Masiv", "Pasha Ungu", "Virgoun"],
@@ -134,8 +128,10 @@ const questions = [
   ],
 ] as const;
 
+const stableNumbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 20];
+
 export const seedData = questions.map(([name, text, choices, correct], index) => {
-  const suffix = String(index + 1).padStart(2, "0");
+  const suffix = String(stableNumbers[index]).padStart(2, "0");
   return {
     id: `p${suffix}`,
     name: String(name),
@@ -181,7 +177,7 @@ const entry = z.object({
 export type SeedEntry = z.infer<typeof entry>;
 
 export function validateSeed(input: unknown): SeedEntry[] {
-  const entries = z.array(entry).length(20).parse(input);
+  const entries = z.array(entry).length(19).parse(input);
   const identifiers = new Set<string>();
   for (const person of entries) {
     if (person.question.authorId !== person.id || person.gift.ownerId !== person.id)

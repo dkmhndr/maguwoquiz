@@ -27,7 +27,7 @@ run("db:check");
 const first = join(directory, "private-invitations.json");
 run("invites:generate", [first]);
 const data = JSON.parse(await readFile(first, "utf8")) as { url: string }[];
-if (data.length !== 20 || new Set(data.map((d) => d.url)).size !== 20)
+if (data.length !== 19 || new Set(data.map((d) => d.url)).size !== 19)
   throw new Error("Invalid invitation export.");
 if (((await stat(first)).mode & 0o777) !== 0o600)
   throw new Error("Invitation export is not private.");
@@ -39,5 +39,5 @@ try {
 }
 run("invites:generate", [join(directory, "private-invitations-v2.json"), "--rotate"]);
 console.log(
-  "CLI verification passed: additive migrations, safe repeated seed, private exports, refusal, and explicit rotation.",
+  "CLI verification passed: migrations, safe repeated seed, private exports, refusal, and explicit rotation.",
 );

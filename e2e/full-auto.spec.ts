@@ -36,7 +36,7 @@ test("full auto survives host disconnect, shows a 10-second intermission, and cl
     if (initial.round.authorId === "p01") await player.goto(links[1].url);
     const author = seedData.find((p) => p.id === initial.round.authorId)!;
     const correct = author.question.options.findIndex((o) => o.correct);
-    const wrongPlayerIndex = initial.round.authorId === "p03" ? 3 : 2;
+    const wrongPlayerIndex = initial.round.authorId === seedData[2].id ? 3 : 2;
     await wrongPlayer.goto(links[wrongPlayerIndex].url);
     await expect(player.locator(".question-card")).toBeVisible();
     await expect(player.locator(".author-chip strong")).toHaveText(author.name);

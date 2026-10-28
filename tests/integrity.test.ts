@@ -13,7 +13,7 @@ it("blocks mismatched final gift counts without allocating anything and keeps th
   const host = await app.host(),
     player = await app.player(0);
   await host.action("initialize");
-  for (let i = 0; i < 20; i++) {
+  for (let i = 0; i < 19; i++) {
     await host.action("start");
     await host.action("close");
     await host.action("advance");

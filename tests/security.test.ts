@@ -13,9 +13,9 @@ describe("session and mutation security", () => {
     await app?.close();
   });
 
-  it("produces 20 distinct fragment invitations and rejects guessed, malformed, and unknown links", async () => {
-    expect(app.links).toHaveLength(20);
-    expect(new Set(app.links.map((link) => link.url)).size).toBe(20);
+  it("produces 19 distinct fragment invitations and rejects guessed, malformed, and unknown links", async () => {
+    expect(app.links).toHaveLength(19);
+    expect(new Set(app.links.map((link) => link.url)).size).toBe(19);
     expect(app.links.every((link) => new URL(link.url).hash.length === 44)).toBe(true);
     expect((await app.request("POST", "invite", { token: "a".repeat(43) })).status).toBe(401);
     expect((await app.request("POST", "invite", { token: "guess" })).status).toBe(400);

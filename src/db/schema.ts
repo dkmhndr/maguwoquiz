@@ -120,10 +120,10 @@ export const games = pgTable(
       "bq_game_status",
       sql`${t.status} in ('lobby', 'question_active', 'round_closed', 'result_revealed', 'final_gacha', 'game_complete')`,
     ),
-    check("bq_round_number", sql`${t.currentRound} between 0 and 20`),
+    check("bq_round_number", sql`${t.currentRound} between 0 and 19`),
     check(
       "bq_question_order_length",
-      sql`${t.questionOrder} is null or jsonb_array_length(${t.questionOrder}) = 20`,
+      sql`${t.questionOrder} is null or jsonb_array_length(${t.questionOrder}) = 19`,
     ),
   ],
 );
@@ -152,7 +152,7 @@ export const rounds = pgTable(
     uniqueIndex("bq_one_active_round")
       .on(t.gameId)
       .where(sql`${t.closedAt} is null`),
-    check("bq_valid_round_number", sql`${t.number} between 1 and 20`),
+    check("bq_valid_round_number", sql`${t.number} between 1 and 19`),
     check("bq_valid_deadline", sql`${t.deadline} > ${t.startedAt}`),
   ],
 );

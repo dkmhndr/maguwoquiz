@@ -1,6 +1,6 @@
 # Bonding Club
 
-A private mobile-first quiz for **exactly 20 friends, 20 personal questions, and 20 gifts**. Built with Next.js App Router, TypeScript, Drizzle ORM, and Supabase-hosted PostgreSQL. The browser never accesses Supabase directly.
+A private mobile-first quiz for **exactly 19 friends, 19 personal questions, and 19 gifts**. Built with Next.js App Router, TypeScript, Drizzle ORM, and Supabase-hosted PostgreSQL. The browser never accesses Supabase directly.
 
 ## Requirements
 
@@ -39,7 +39,7 @@ Copy only the resulting `HOST_PASSWORD_HASH=...` line into the environment. Chan
 
 ## Content and Database Initialization
 
-`src/seed/data.ts` contains the supplied 20 participant names, questions, four options and answer keys. Stable IDs must remain unique. The answer keys and private questions are sensitive: do not publish the source or CSV before the event. Gift metadata is a generic placeholder because gift contents are unknown; it is stored server-side and never sent to participant or host browsers.
+`src/seed/data.ts` contains the supplied 19 participant names, questions, four options and answer keys. Stable IDs must remain unique. The answer keys and private questions are sensitive: do not publish the source or CSV before the event. Gift metadata is a generic placeholder because gift contents are unknown; it is stored server-side and never sent to participant or host browsers.
 
 ```sh
 npm run db:generate  # Only when intentionally changing the Drizzle schema.
@@ -52,7 +52,7 @@ Committed migrations create eleven `bq_*` tables with foreign keys, indexes, che
 
 Before applying migrations to your Supabase project, take a backup and review `drizzle/*.sql`, especially if the project already has tables named `bq_*`. The initial migration fails rather than replacing colliding tables. Existing unrelated schemas and migration histories are not touched.
 
-The 20-person event requires `0003_twenty_participants.sql`. This migration changes quiz constraints and does not reset data. An existing initialized 21-round event or round 21 prevents the migration from applying; preserve it or arrange a separate fresh event database before migrating. Existing placeholder content is never silently overwritten by the seed command. This app does not automatically reset data or invitations.
+The 19-person event requires `0004_amusing_jack_flag.sql`. Before applying it to an existing database, back up the event and confirm it has not been initialized. The migration removes Syauqy, his question, gift, invitations, and sessions, while preserving the other participants' IDs and invitations. It refuses to run if the game has been initialized or started, or if participant IDs do not match the expected names. Existing content is never silently overwritten by the seed command.
 
 The matching seed can be rerun without modifying results, order, sessions, or allocations. If seeded content differs, the command refuses to overwrite it. This MVP is one event, not a replay/reset tool. Use a separate database/environment for rehearsal; there is no destructive game reset command.
 
@@ -98,9 +98,9 @@ Choose **Full Auto** on the host lobby before the first round, or leave it unche
 
 1. Log in, enable Full Auto, and initialize the shuffled order.
 2. Give the first cue with "Mulai ronde pertama".
-3. Each question accepts answers for the full **15 seconds**, even if all 19 eligible respondents have submitted.
+3. Each question accepts answers for the full **15 seconds**, even if all 18 eligible respondents have submitted.
 4. Correctness and the gift winner appear automatically, followed by a **10-second results intermission** with a shared countdown.
-5. The next question starts automatically. After round 20's intermission, final gacha distributes remaining gifts and the ranking opens automatically.
+5. The next question starts automatically. After round 19's intermission, final gacha distributes remaining gifts and the ranking opens automatically.
 
 There are no early-close/advance controls in Full Auto. The host may disconnect: participant polling still progresses the event. If everyone disconnects and no scheduler is running, reconnection resumes from the persisted phase without skipping questions; an overdue question first gets a full results intermission and the next question gets a fresh 15 seconds. Polling/request latency may add a short delay to transitions, never shorten either phase. This mode adds `drizzle/0002_full_auto_mode.sql`: run `npm run db:migrate` before using the updated app against an existing database. It adds only a default-false mode column and does not reset or reseed anything. Existing games remain manual.
 
@@ -109,21 +109,21 @@ There are no early-close/advance controls in Full Auto. The host may disconnect:
 Host sequence (Full Auto unchecked):
 
 1. Log in at `/host` with the password corresponding to your hash.
-2. Initialize once: the server cryptographically shuffles and persists the 20-question order.
+2. Initialize once: the server cryptographically shuffles and persists the 19-question order.
 3. Start a round. The server creates its fixed 15-second deadline.
-4. Wait, or close early. Deadline expiry, all 19 non-author submissions, or early closure automatically publish the correct answer and winner. No reveal button is needed.
-5. Advance, then cue the next round's start when everyone is ready. Results stay visible until you advance; the next timer never starts on its own. Repeat for 20 rounds.
+4. Wait, or close early. Deadline expiry, all 18 non-author submissions, or early closure automatically publish the correct answer and winner. No reveal button is needed.
+5. Advance, then cue the next round's start when everyone is ready. Results stay visible until you advance; the next timer never starts on its own. Repeat for 19 rounds.
 6. Advance to final gacha and distribute remaining gifts. Even if no gifts remain, this verifies completion.
 
 The author cannot answer their own question. Previous winners may answer but cannot win again. Each answer is acknowledged only after a committed server write. The winner is the first correct eligible accepted submission ordered by database receipt timestamp, then monotonic database submission ID. Client timestamps are rejected. Closure, result publication, and any gift assignment are committed transactionally. While a round is active, its key, winner, and correctness remain absent from player/host state responses.
 
 Gift contents are never revealed: the personal card and host/final ledger show only who gives a gift to whom. Gift names and descriptions are excluded from browser responses, not merely hidden in the UI. This also applies after final gacha and on reconnect. Existing closed-but-unrevealed rounds from the previous version automatically publish their persisted results on the next trusted request without awarding gifts twice; no database migration, reseed, or reset is required for this revision.
 
-Final gacha validates remaining counts, shuffles gifts without replacement, commits every pairing atomically, and completes only with 20 unique recipients and gifts. Repeated/concurrent gacha calls return the same persisted result. Final gacha may return a participant's own gift; the PRD did not prohibit that.
+Final gacha validates remaining counts, shuffles gifts without replacement, commits every pairing atomically, and completes only with 19 unique recipients and gifts. Repeated/concurrent gacha calls return the same persisted result. Final gacha may return a participant's own gift; the PRD did not prohibit that.
 
 ### Final Ranking
 
-After final gacha completes the game, the host and all participants see the same ranking of all 20 participants by the number of correct answers. Each player is highlighted on their own screen. Tied scores share the same rank (for example, 1, 1, 3); player IDs provide a stable display order within a tie but do not break it. Wrong or unanswered questions contribute zero, and an author cannot answer their own question.
+After final gacha completes the game, the host and participants see the top three players by correct answers; each participant also sees their own rank. Tied scores share the same rank (for example, 1, 1, 3); player IDs provide a stable display order within a tie but do not break it. Wrong or unanswered questions contribute zero, and an author cannot answer their own question.
 
 All correct answers count regardless of previous gift wins; answer speed does not affect ranking. Gift eligibility and the final gacha are unchanged. The ranking is returned only after `game_complete`, derived from persisted submissions, and includes players with zero correct answers. Refresh/reconnect and existing completed games work without a migration or reseed. Gift contents remain secret.
 
@@ -166,7 +166,7 @@ npm run test:e2e
 npm run test:e2e:auto
 ```
 
-Integration tests use actual SQL migrations and embedded PostgreSQL (PGlite), not an in-memory imitation of game logic. They exercise the same Request/Response handler mounted in Next.js and cover seed validation, session isolation, revoked/expired invitations, host authorization, cookie protection, cross-origin requests, duplicate/concurrent answers, author exclusion, option ownership, transitions, deadlines without the host, no key leak, winner/tie ordering, previous winners, no-winner rounds, gift uniqueness, gacha integrity/idempotency, and a complete 20-player simultaneous-answer simulation.
+Integration tests use actual SQL migrations and embedded PostgreSQL (PGlite), not an in-memory imitation of game logic. They exercise the same Request/Response handler mounted in Next.js and cover seed validation, session isolation, revoked/expired invitations, host authorization, cookie protection, cross-origin requests, duplicate/concurrent answers, author exclusion, option ownership, transitions, deadlines without the host, no key leak, winner/tie ordering, previous winners, no-winner rounds, gift uniqueness, gacha integrity/idempotency, and a complete 19-player simultaneous-answer simulation.
 
 PGlite serializes its connection, so these tests do not by themselves prove independent-process PostgreSQL row-lock behavior or Supabase latency. For that, use a dedicated test PostgreSQL URL:
 
@@ -186,7 +186,7 @@ Browser tests start the real Next.js app against a separately created disposable
 - Exactly one event; no question editor, registration, multi-event administration, reset, or sound effects.
 - Polling is the MVP synchronization mechanism; updates are not instantaneous push notifications.
 - Timing fairness includes real network/server latency; receipt order cannot measure the moment someone tapped on their phone.
-- One serialized event lock is appropriate for 20 participants, not a high-scale multi-event service.
+- One serialized event lock is appropriate for 19 participants, not a high-scale multi-event service.
 - Session expiration and invitation revocation are enforced, but old rows are not periodically purged. Configure maintenance outside a live game if long-term retention matters.
 - Static homepage styling uses local font fallbacks, inline SVG, and CSS; no third-party asset requests are made.
 - CSP permits Next.js inline scripts and development evaluation. All content is seed-controlled plain React text, never injected HTML. Tighten to a nonce-based CSP if introducing third-party/user-generated content.

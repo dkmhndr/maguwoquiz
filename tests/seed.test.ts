@@ -2,8 +2,8 @@ import { describe, expect, it } from "vitest";
 import { seedData, validateSeed } from "../src/seed/data";
 
 describe("event seed", () => {
-  it("accepts exactly 20 authors each with one question, four options, one key, and one gift", () => {
-    expect(validateSeed(seedData)).toHaveLength(20);
+  it("accepts exactly 19 authors each with one question, four options, one key, and one gift", () => {
+    expect(validateSeed(seedData)).toHaveLength(19);
   });
   it("preserves the supplied participant order and answer keys", () => {
     expect(seedData.map((person) => person.name)).toEqual([
@@ -25,12 +25,13 @@ describe("event seed", () => {
       "Gilang",
       "Dany",
       "Ari",
-      "Syauqy",
       "Khasin",
     ]);
     expect(
       seedData.map((person) => person.question.options.findIndex((option) => option.correct)),
-    ).toEqual([1, 2, 1, 3, 1, 2, 3, 1, 2, 0, 3, 1, 2, 0, 1, 2, 3, 0, 2, 1]);
+    ).toEqual([1, 2, 1, 3, 1, 2, 3, 1, 2, 0, 3, 1, 2, 0, 1, 2, 3, 0, 1]);
+    expect(seedData[1].id).toBe("p02");
+    expect(seedData.at(-1)?.id).toBe("p20");
   });
   it("rejects missing participants", () => {
     expect(() => validateSeed(seedData.slice(1))).toThrow();
